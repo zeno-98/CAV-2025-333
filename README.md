@@ -1,19 +1,20 @@
 # Case Studies and Full Version of CAV 2025 Paper: "Compositional Abstraction for Timed Systems with Broadcast Synchronization"
 This repository contains the **case studies files** and **full version** of our paper accepted to **CAV 2025**.
 
+## CaseStudies
 ### Case Study I: Producer-Consumer System
-**PCS.xml**: the original model and the abstraction
+PCS.xml: the original model and the abstraction
 
-**DATA_PCS.xlsx**: the raw experiment data
+DATA_PCS.xlsx: the raw experiment data
 
 ### Case Study II: Clock Synchronization Protocol
-**CSP_origin.xml**: the original model
+CSP_origin.xml: the original model
 
-**CSP_abstraction.xml**: the abstraction
+CSP_abstraction.xml: the abstraction
 
-**DATA_CSP.xlsx**: the raw experiment data
+DATA_CSP.xlsx: the raw experiment data
 
-### Full Version 
+## Full Version 
 This version includes all appendices, proofs, and implementation details omitted from the conference version due to space limitations.
 
 📄 **Conference version**: To appear in the LNCS proceedings.  

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>//Simple model of Chess Mac protocol for wireless sensor networks
+
+
+//CONSTANTS AND TYPES
+//number of nodes; we assume N&gt;=2
+const int N = 4;
+//set of node identifiers
+typedef int[0,N-1] Nodes;
+
+//number of active slots within one frame; we assume N &lt;= n &lt;= C
+const int n = N;
+
+//number of slots within one frame
+const int C = n+2;
+
+//transmission slot number; we assume each node has unique active slot tsn[i] in which it transmits
+const int[0,n-1] tsn[Nodes] = {0,1,2,3};
+
+//number of clock cycles per slot
+const int k0 = 21;
+
+//guard time; we assume 0 &lt; g and 2g &lt; k0
+const int g = 10;
+
+//tail time; we assume t&gt;0 and g+t+2 &lt;= k0
+const int t = 2;
+
+//minimal time  between two clock ticks; we assume 0&lt; min
+const int min = 30;
+
+//maximal time  between two clock ticks; we assume min&lt;= max
+const int max = 31;
+//NB We grossly exagerate the clock drift theta; in reality it is approximately 20ppm
+
+//CHANNELS
+broadcast chan start_message[Nodes], tick[Nodes];
+
+//STATE VARIABLES
+//hardware clock of a node; to keep state space tractable
+//we assume clocks are reset at the end of each slot
+int[0,k0-1] clk[Nodes];
+
+//current slot number of a node
+int[0,C-1] csn[Nodes]; 
+
+
+</declaration>
+	<template>
+		<name x="5" y="5">WSN</name>
+		<parameter>const Nodes i</parameter>
+		<location id="id0" x="510" y="340">
+			<name x="446" y="308">GO_SEND</name>
+			<urgent/>
+		</location>
+		<location id="id1" x="612" y="442">
+			<name x="628" y="434">WAIT</name>
+		</location>
+		<location id="id2" x="714" y="340">
+			<name x="714" y="308">SENDING</name>
+		</location>
+		<init ref="id1"/>
+		<transition id="id3">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="544" y="316">start_message[i]!</label>
+		</transition>
+		<transition id="id4">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="544" y="552">clk[i]==k0-1</label>
+			<label kind="synchronisation" x="544" y="569">tick[i]?</label>
+			<label kind="assignment" x="544" y="586">csn[i]:=(csn[i]+1) % C</label>
+			<nail x="510" y="544"/>
+			<nail x="714" y="544"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="680" y="374">clk[i]==k0-t-1</label>
+			<label kind="synchronisation" x="680" y="391">tick[i]?</label>
+		</transition>
+		<transition id="id6">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="408" y="365">csn[i]==tsn[i]
+&amp;&amp; clk[i]==g-1</label>
+			<label kind="synchronisation" x="408" y="408">tick[i]?</label>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">CLOCK</name>
+		<parameter>const Nodes i</parameter>
+		<declaration>clock x;</declaration>
+		<location id="id7" x="170" y="0">
+			<name x="144" y="-25">X0</name>
+			<label kind="invariant" x="127" y="17">x&lt;=max</label>
+		</location>
+		<init ref="id7"/>
+		<transition id="id8">
+			<source ref="id7"/>
+			<target ref="id7"/>
+			<label kind="guard" x="263" y="-51">x&gt;=min</label>
+			<label kind="synchronisation" x="263" y="-34">tick[i]!</label>
+			<label kind="assignment" x="263" y="-17">x:=0,
+clk[i]:=(clk[i]+1)%k0</label>
+			<nail x="238" y="34"/>
+			<nail x="238" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>SYNCHRONIZER</name>
+		<parameter>const Nodes i</parameter>
+		<location id="id9" x="-102" y="-204">
+			<name x="-102" y="-236">S1</name>
+		</location>
+		<location id="id10" x="-306" y="-204">
+			<name x="-316" y="-234">S0</name>
+		</location>
+		<init ref="id10"/>
+		<transition id="id11">
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-272" y="-144">tick[i]?</label>
+			<label kind="assignment" x="-272" y="-127">clk[i]:=g+1</label>
+			<nail x="-102" y="-102"/>
+			<nail x="-306" y="-102"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="select" x="-272" y="-246">j:Nodes</label>
+			<label kind="guard" x="-272" y="-263">csn[i] &lt; n</label>
+			<label kind="synchronisation" x="-272" y="-229">start_message[j]?</label>
+		</transition>
+	</template>
+	<system>system CLOCK, WSN, SYNCHRONIZER;</system>
+	<queries>
+		<query>
+			<formula>A[] forall(i:Nodes) forall(j:Nodes) (WSN(i).SENDING imply csn[i]==csn[j])</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-01-29 23:59:21 +0800">
+			</result>
+		</query>
+	</queries>
+</nta>

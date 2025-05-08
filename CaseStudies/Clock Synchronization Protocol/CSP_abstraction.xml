@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>//Simple model of Chess Mac protocol for wireless sensor networks
+
+//CONSTANTS AND TYPES
+//number of nodes; we assume N&gt;=2
+const int N = 7;
+//set of node identifiers
+typedef int[0,N-1] Nodes;
+
+typedef int[0,1] leftNodes;
+typedef int[2,N-1] abstractedNodes;
+
+//number of active slots within one frame; we assume N &lt;= n &lt;= C
+const int n = N;
+
+//number of slots within one frame
+const int C = n+2;
+
+//transmission slot number; we assume each node has unique active slot tsn[i] in which it transmits
+const int[0,N-1] tsn[Nodes] = {5,6,0,1,2,3,4};
+
+//number of clock cycles per slot
+const int k0 = 21;
+
+//guard time; we assume 0 &lt; g and 2g &lt; k0
+const int g = 10;
+
+//tail time; we assume t&gt;0 and g+t+2 &lt;= k0
+const int t = 2;
+
+//minimal time  between two clock ticks; we assume 0&lt; min
+const int min = 30;
+
+//maximal time  between two clock ticks; we assume min&lt;= max
+const int max = 31;
+//NB We grossly exagerate the clock drift theta; in reality it is approximately 20ppm
+
+//CHANNELS
+broadcast chan start_message[Nodes], tick[Nodes];
+
+//STATE VARIABLES
+//hardware clock of a node; to keep state space tractable
+//we assume clocks are reset at the end of each slot
+int[0,k0-1] clk[Nodes];
+
+//current slot number of a node
+int[0,C-1] csn[Nodes]; 
+
+
+</declaration>
+	<template>
+		<name>CHAOS</name>
+		<declaration>clock x;
+int times = 0;</declaration>
+		<location id="id0" x="-238" y="-34">
+			<name x="-314" y="-59">active</name>
+			<label kind="invariant" x="-333" y="-38">x&lt;=k0*max</label>
+		</location>
+		<location id="id1" x="34" y="-34">
+			<name x="51" y="-59">inactive</name>
+			<label kind="invariant" x="51" y="-34">x&lt;=(C-N)*k0*max</label>
+		</location>
+		<location id="id2" x="-442" y="-34">
+			<name x="-454" y="-66">ini</name>
+			<label kind="invariant" x="-425" y="-51">x&lt;=g*max</label>
+		</location>
+		<init ref="id2"/>
+		<transition id="id3">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="select" x="-153" y="-17">j:leftNodes</label>
+			<label kind="synchronisation" x="-153" y="0">start_message[j]?</label>
+			<label kind="assignment" x="-153" y="17">x:=0,times:=1</label>
+			<nail x="0" y="-17"/>
+			<nail x="-187" y="-17"/>
+		</transition>
+		<transition id="id4">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="select" x="-408" y="4">j:leftNodes</label>
+			<label kind="synchronisation" x="-408" y="21">start_message[j]?</label>
+			<label kind="assignment" x="-408" y="38">x:=0,times:=1</label>
+			<nail x="-408" y="0"/>
+			<nail x="-272" y="0"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="select" x="-408" y="-127">i:abstractedNodes</label>
+			<label kind="guard" x="-408" y="-144">x&gt;=g*min</label>
+			<label kind="synchronisation" x="-408" y="-110">start_message[i]!</label>
+			<label kind="assignment" x="-408" y="-93">x:=0,times:=1</label>
+			<nail x="-408" y="-68"/>
+			<nail x="-272" y="-68"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="select" x="-154" y="-103">i:abstractedNodes</label>
+			<label kind="guard" x="-154" y="-119">x&gt;=((C-N)*k0-1)*min</label>
+			<label kind="synchronisation" x="-154" y="-87">start_message[i]!</label>
+			<label kind="assignment" x="-153" y="-72">x:=0,times:=1</label>
+			<nail x="0" y="-51"/>
+			<nail x="-187" y="-51"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="select" x="-68" y="93">j:leftNodes</label>
+			<label kind="guard" x="-68" y="76">times==N-1</label>
+			<label kind="synchronisation" x="-68" y="110">start_message[j]?</label>
+			<label kind="assignment" x="-68" y="127">x:=0</label>
+			<nail x="-170" y="68"/>
+			<nail x="34" y="68"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="select" x="-68" y="-195">i:abstractedNodes</label>
+			<label kind="guard" x="-68" y="-212">x&gt;=(k0-1)*min &amp;&amp; times==N-1</label>
+			<label kind="synchronisation" x="-68" y="-178">start_message[i]!</label>
+			<label kind="assignment" x="-68" y="-161">x:=0</label>
+			<nail x="-170" y="-136"/>
+			<nail x="34" y="-136"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="select" x="-306" y="-212">i:abstractedNodes</label>
+			<label kind="guard" x="-306" y="-229">x&gt;=(k0-1)*min &amp;&amp; times&lt;N-1</label>
+			<label kind="synchronisation" x="-306" y="-195">start_message[i]!</label>
+			<label kind="assignment" x="-306" y="-178">x:=0,times:=times+1</label>
+			<nail x="-255" y="-153"/>
+			<nail x="-221" y="-153"/>
+		</transition>
+		<transition id="id10">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="select" x="-272" y="102">j:leftNodes</label>
+			<label kind="guard" x="-272" y="85">times&lt;N-1</label>
+			<label kind="synchronisation" x="-272" y="119">start_message[j]?</label>
+			<label kind="assignment" x="-272" y="136">x:=0,times:=times+1</label>
+			<nail x="-221" y="85"/>
+			<nail x="-255" y="85"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">WSN</name>
+		<parameter>const leftNodes i</parameter>
+		<location id="id11" x="544" y="374">
+			<name x="480" y="342">go_send</name>
+			<urgent/>
+		</location>
+		<location id="id12" x="612" y="442">
+			<name x="628" y="433">wait</name>
+		</location>
+		<location id="id13" x="680" y="374">
+			<name x="680" y="342">sending</name>
+		</location>
+		<init ref="id12"/>
+		<transition id="id14">
+			<source ref="id11"/>
+			<target ref="id13"/>
+			<label kind="synchronisation" x="550" y="329">start_message[i]!</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id12"/>
+			<target ref="id12"/>
+			<label kind="guard" x="578" y="501">clk[i]==k0-1</label>
+			<label kind="synchronisation" x="578" y="518">tick[i]?</label>
+			<label kind="assignment" x="578" y="535">csn[i]:=(csn[i]+1) % C</label>
+			<nail x="578" y="493"/>
+			<nail x="646" y="493"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id13"/>
+			<target ref="id12"/>
+			<label kind="guard" x="654" y="399">clk[i]==k0-t-1</label>
+			<label kind="synchronisation" x="654" y="416">tick[i]?</label>
+		</transition>
+		<transition id="id17">
+			<source ref="id12"/>
+			<target ref="id11"/>
+			<label kind="guard" x="450" y="408">csn[i]==tsn[i]
+&amp;&amp; clk[i]==g-1</label>
+			<label kind="synchronisation" x="450" y="451">tick[i]?</label>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">CLOCK</name>
+		<parameter>const leftNodes i</parameter>
+		<declaration>clock x;</declaration>
+		<location id="id18" x="170" y="0">
+			<name x="144" y="-25">x0</name>
+			<label kind="invariant" x="127" y="17">x&lt;=max</label>
+		</location>
+		<init ref="id18"/>
+		<transition id="id19">
+			<source ref="id18"/>
+			<target ref="id18"/>
+			<label kind="guard" x="246" y="-42">x&gt;=min</label>
+			<label kind="synchronisation" x="246" y="-25">tick[i]!</label>
+			<label kind="assignment" x="246" y="-8">x:=0,
+clk[i]:=(clk[i]+1)%k0</label>
+			<nail x="238" y="34"/>
+			<nail x="238" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>SYNCHRONIZER</name>
+		<parameter>const leftNodes i</parameter>
+		<location id="id20" x="-136" y="-204">
+			<name x="-143" y="-233">s1</name>
+		</location>
+		<location id="id21" x="-306" y="-204">
+			<name x="-316" y="-234">s0</name>
+		</location>
+		<init ref="id21"/>
+		<transition id="id22">
+			<source ref="id20"/>
+			<target ref="id21"/>
+			<label kind="synchronisation" x="-289" y="-195">tick[i]?</label>
+			<label kind="assignment" x="-289" y="-178">clk[i]:=g+1</label>
+			<nail x="-136" y="-153"/>
+			<nail x="-306" y="-153"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="select" x="-289" y="-246">j:Nodes</label>
+			<label kind="guard" x="-289" y="-263">csn[i] &lt; n</label>
+			<label kind="synchronisation" x="-289" y="-229">start_message[j]?</label>
+		</transition>
+	</template>
+	<system>system CLOCK, WSN, SYNCHRONIZER, CHAOS;</system>
+	<queries>
+		<query>
+			<formula>A[] (WSN(0).sending or WSN(1).sending) imply csn[0]==csn[1]</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-01-31 23:10:01 +0800">
+			</result>
+		</query>
+	</queries>
+</nta>

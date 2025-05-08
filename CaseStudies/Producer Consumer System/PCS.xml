@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>const int k = 3;
+const int m = 2;
+const int r = 1;
+const int size = 2;
+const int itv = k+m+r;
+const int n = 11;
+const int chaos_num = 1;
+
+typedef int[1,n] id_t;
+int id = 0;
+int w = 0;
+
+broadcast chan start;
+broadcast chan out;
+chan read;
+chan in;
+chan go;
+</declaration>
+	<template>
+		<name x="5" y="5">counter</name>
+		<declaration>clock x;</declaration>
+		<location id="id0" x="0" y="0">
+			<name x="22" y="-12">count</name>
+		</location>
+		<location id="id1" x="-68" y="68">
+			<name x="-96" y="46">all</name>
+			<label kind="invariant" x="-114" y="63">x&lt;=2</label>
+		</location>
+		<location id="id2" x="-119" y="0">
+			<name x="-127" y="-32">ini</name>
+			<committed/>
+		</location>
+		<init ref="id2"/>
+		<transition id="id3">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-102" y="-17">start!</label>
+			<label kind="assignment" x="-68" y="-17">w=0</label>
+		</transition>
+		<transition id="id4">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="59" y="-63">w&gt;0</label>
+			<label kind="synchronisation" x="60" y="-52">go?</label>
+			<label kind="assignment" x="60" y="-39">w--</label>
+			<nail x="34" y="-59"/>
+			<nail x="59" y="-34"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-83" y="12">go!</label>
+			<label kind="assignment" x="-82" y="26">w--</label>
+			<nail x="-59" y="34"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-27" y="41">w==n-1</label>
+			<label kind="synchronisation" x="-27" y="54">in?</label>
+			<label kind="assignment" x="-28" y="66">x=0,w++</label>
+			<nail x="-8" y="34"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="61" y="18">out?</label>
+			<label kind="assignment" x="62" y="32">w=0</label>
+			<nail x="34" y="59"/>
+			<nail x="59" y="34"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-88" y="-63">w&lt;n-1</label>
+			<label kind="synchronisation" x="-87" y="-50">in?</label>
+			<label kind="assignment" x="-87" y="-38">w++</label>
+			<nail x="-34" y="-59"/>
+			<nail x="-59" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>buffer</name>
+		<declaration>clock x;
+int num = 0;</declaration>
+		<location id="id9" x="0" y="0">
+			<name x="-34" y="-25">run</name>
+			<label kind="invariant" x="17" y="-21">x&lt;=8</label>
+		</location>
+		<location id="id10" x="204" y="0">
+			<name x="179" y="13">overflow</name>
+		</location>
+		<location id="id11" x="-117" y="0">
+			<name x="-143" y="-22">ini</name>
+		</location>
+		<init ref="id11"/>
+		<transition id="id12">
+			<source ref="id11"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-97" y="-19">start?</label>
+			<label kind="assignment" x="-97" y="-3">x=0,num=0</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="23" y="-55">num&lt;10 &amp;&amp; x&gt;=8</label>
+			<label kind="assignment" x="24" y="-41">x=0,num++</label>
+			<nail x="-14" y="-47"/>
+			<nail x="17" y="-47"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-92" y="19">num==0</label>
+			<label kind="synchronisation" x="-77" y="32">read?</label>
+			<nail x="-17" y="51"/>
+			<nail x="-42" y="34"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="41" y="8">num&gt;0</label>
+			<label kind="synchronisation" x="41" y="20">read?</label>
+			<label kind="assignment" x="41" y="32">num--</label>
+			<nail x="17" y="51"/>
+			<nail x="42" y="34"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id10"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="202" y="-36">read?</label>
+			<nail x="238" y="17"/>
+			<nail x="238" y="-17"/>
+		</transition>
+		<transition id="id17">
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="guard" x="62" y="-18">num&gt;=10 &amp;&amp; x&gt;=8</label>
+			<label kind="assignment" x="94" y="-2">x=0,num++</label>
+		</transition>
+	</template>
+	<template>
+		<name>P</name>
+		<parameter>const id_t pid</parameter>
+		<declaration>clock x;
+</declaration>
+		<location id="id18" x="170" y="0">
+			<name x="144" y="-34">req</name>
+			<label kind="invariant" x="131" y="10">x&lt;=3</label>
+		</location>
+		<location id="id19" x="306" y="0">
+			<name x="314" y="-30">wait</name>
+		</location>
+		<location id="id20" x="306" y="85">
+			<name x="321" y="66">cs</name>
+			<label kind="invariant" x="322" y="79">x&lt;=1</label>
+		</location>
+		<location id="id21" x="170" y="85">
+			<name x="184" y="61">com</name>
+			<committed/>
+		</location>
+		<location id="id22" x="86" y="0">
+			<name x="78" y="-32">ini</name>
+		</location>
+		<init ref="id22"/>
+		<transition id="id23">
+			<source ref="id19"/>
+			<target ref="id20"/>
+			<label kind="guard" x="234" y="4">x&gt;=2 &amp;&amp;
+id==pid</label>
+			<label kind="synchronisation" x="238" y="51">go!</label>
+			<label kind="assignment" x="263" y="51">x=0</label>
+			<nail x="289" y="25"/>
+			<nail x="289" y="51"/>
+		</transition>
+		<transition id="id24">
+			<source ref="id22"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="108" y="-17">start?</label>
+			<label kind="assignment" x="110" y="-1">x=0</label>
+		</transition>
+		<transition id="id25">
+			<source ref="id21"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="142" y="25">out!</label>
+			<label kind="assignment" x="142" y="38">x=0</label>
+		</transition>
+		<transition id="id26">
+			<source ref="id20"/>
+			<target ref="id21"/>
+			<label kind="synchronisation" x="222" y="84">read!</label>
+		</transition>
+		<transition id="id27">
+			<source ref="id19"/>
+			<target ref="id20"/>
+			<label kind="guard" x="328" y="10">x&gt;=2 &amp;&amp;
+id==pid</label>
+			<label kind="synchronisation" x="328" y="45">go?</label>
+			<label kind="assignment" x="357" y="51">x=0</label>
+			<nail x="323" y="25"/>
+			<nail x="323" y="51"/>
+		</transition>
+		<transition id="id28">
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="209" y="-41">out?</label>
+			<label kind="assignment" x="243" y="-41">x=0</label>
+			<nail x="272" y="-23"/>
+			<nail x="204" y="-23"/>
+		</transition>
+		<transition id="id29">
+			<source ref="id18"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="195" y="-19">in!</label>
+			<label kind="assignment" x="212" y="-19">x=0,id=pid</label>
+		</transition>
+	</template>
+	<template>
+		<name>other1</name>
+		<declaration>clock x;
+clock y;</declaration>
+		<location id="id30" x="-34" y="57">
+			<name x="-63" y="37">cs</name>
+			<label kind="invariant" x="-18" y="45">x&lt;=1</label>
+		</location>
+		<location id="id31" x="-136" y="57">
+			<name x="-177" y="40">com</name>
+			<committed/>
+		</location>
+		<location id="id32" x="-34" y="0">
+			<name x="-71" y="-24">wait</name>
+			<label kind="invariant" x="-18" y="-11">x&lt;=5</label>
+		</location>
+		<location id="id33" x="-136" y="0">
+			<name x="-170" y="-25">req</name>
+			<label kind="invariant" x="-121" y="-20">x&lt;=3</label>
+		</location>
+		<location id="id34" x="-238" y="0">
+			<name x="-263" y="-25">ini</name>
+			<committed/>
+		</location>
+		<init ref="id34"/>
+		<transition id="id35">
+			<source ref="id30"/>
+			<target ref="id31"/>
+			<label kind="synchronisation" x="-101" y="40">read!</label>
+		</transition>
+		<transition id="id36">
+			<source ref="id32"/>
+			<target ref="id30"/>
+			<label kind="assignment" x="-62" y="17">x=0</label>
+		</transition>
+		<transition id="id37">
+			<source ref="id33"/>
+			<target ref="id32"/>
+		</transition>
+		<transition id="id38">
+			<source ref="id31"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-169" y="9">out!</label>
+			<label kind="assignment" x="-168" y="21">x=0</label>
+		</transition>
+		<transition id="id39">
+			<source ref="id34"/>
+			<target ref="id33"/>
+			<label kind="assignment" x="-204" y="-17">x=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>other2</name>
+		<declaration>clock x;</declaration>
+		<location id="id40" x="-136" y="0">
+			<name x="-146" y="-34">w</name>
+			<label kind="invariant" x="-178" y="8">x&lt;=5</label>
+		</location>
+		<location id="id41" x="-68" y="-34">
+			<name x="-76" y="-68">cs</name>
+			<label kind="invariant" x="-51" y="-51">x&lt;=1</label>
+		</location>
+		<location id="id42" x="-68" y="34">
+			<name x="-76" y="42">com</name>
+			<committed/>
+		</location>
+		<location id="id43" x="-238" y="0">
+			<name x="-255" y="-34">start</name>
+			<committed/>
+		</location>
+		<init ref="id43"/>
+		<transition id="id44">
+			<source ref="id40"/>
+			<target ref="id41"/>
+			<label kind="assignment" x="-119" y="-42">x=0</label>
+		</transition>
+		<transition id="id45">
+			<source ref="id42"/>
+			<target ref="id40"/>
+			<label kind="synchronisation" x="-127" y="17">out!</label>
+			<label kind="assignment" x="-127" y="34">x=0</label>
+		</transition>
+		<transition id="id46">
+			<source ref="id41"/>
+			<target ref="id42"/>
+			<label kind="synchronisation" x="-59" y="-17">read!</label>
+			<label kind="assignment" x="-59" y="0">id=0</label>
+		</transition>
+		<transition id="id47">
+			<source ref="id43"/>
+			<target ref="id40"/>
+			<label kind="assignment" x="-204" y="-17">x=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>other3</name>
+		<declaration>clock x;</declaration>
+		<location id="id48" x="-136" y="0">
+			<name x="-161" y="-34">working</name>
+			<label kind="invariant" x="-170" y="17">x&lt;=6</label>
+		</location>
+		<location id="id49" x="-238" y="0">
+			<name x="-248" y="-34">start</name>
+			<committed/>
+		</location>
+		<init ref="id49"/>
+		<transition id="id50">
+			<source ref="id48"/>
+			<target ref="id48"/>
+			<label kind="synchronisation" x="-76" y="-17">read!</label>
+			<label kind="assignment" x="-76" y="0">x=0</label>
+			<nail x="-85" y="-25"/>
+			<nail x="-85" y="25"/>
+		</transition>
+		<transition id="id51">
+			<source ref="id49"/>
+			<target ref="id48"/>
+			<label kind="assignment" x="-204" y="-25">x=0</label>
+		</transition>
+	</template>
+	<system>system buffer,counter,P;
+
+//system buffer,other2;
+
+//system buffer, other3;
+
+//system timer,master,counter,P;
+
+//system timer,master,counter,P,other;
+
+//system buffer,other3;
+
+//system buffer,other4;</system>
+	<queries>
+		<query>
+			<formula>A[] not buffer.overflow</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2025-01-27 22:43:21 +0800">
+			</result>
+		</query>
+	</queries>
+</nta>
